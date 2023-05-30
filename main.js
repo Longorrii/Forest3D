@@ -127,22 +127,8 @@ class LoadModelDemo {
       './resources/doraemon/', 'doraemon.fbx', 'Hip Hop Dancing.fbx', new THREE.Vector3(30, 0, -15), 7);
     this._LoadAnimatedModelAndPlay(
       './resources/doraemon/', 'doraemon.fbx', 'Hip Hop Dancing.fbx', new THREE.Vector3(-30, 0, -15), 7);
-
-    // for (let i = 0; i < 10; ++i) {
-    //   const pos = new THREE.Vector3(
-    //     (Math.random() * 2.0 - 1.0) * 500,
-    //     0,
-    //     (Math.random() * 2.0 - 1.0) * 500
-    //   );
-    //   this._LoadAnimatedModelAndPlay(
-    //     './resources/animal/', 'Deer.fbx', '', pos, 0.06);
-    // }
-    
-
     this._RAF();
   }
-
-
 
   _SetupMouseControls() {
     let isDragging = false;
@@ -195,17 +181,6 @@ class LoadModelDemo {
       this._LoadAnimatedModelAndPlay(
         './resources/animal/', 'Deer.fbx', '', pos, 0.06);
     }
-
-    for (let i = 0; i < 20; ++i) {
-      const pos = new THREE.Vector3(
-        (Math.random() * 2.0 - 1.0) * 500,
-        100,
-        (Math.random() * 2.0 - 1.0) * 500
-      );
-      this._LoadAnimatedModelAndPlay(
-        './resources/animal/', 'Bird.fbx', 'Bird_Animation.fbx', pos, 0.1);
-    }
-
   }
 
   _LoadSky() {
