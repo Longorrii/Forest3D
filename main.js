@@ -27,124 +27,6 @@ void main() {
   gl_FragColor = vec4( mix( bottomColor, topColor, max( pow( max( h , 0.0), exponent ), 0.0 ) ), 1.0 );
 }`;
 
-class BasicCharacterControls {
-  constructor(params) {
-    this._Init(params);
-  }
-
-  _Init(params) {
-    //Lưu trữ các tham số truyền vào constructor.
-    this._params = params;
-    //Biến di chuyển
-    this._move = {
-      forward: false,
-      backward: false,
-      left: false,
-      right: false,
-    };
-    //Gia tốc giảm tốc của nhân vật
-    this._decceleration = new THREE.Vector3(-0.0005, -0.0001, -5.0);
-    //Gia tốc tăng tốc của nhân vật
-    this._acceleration = new THREE.Vector3(1, 0.25, 50.0);
-    //Vận tốc của nhân vật. 
-    this._velocity = new THREE.Vector3(0, 0, 0);
-
-    document.addEventListener('keydown', (e) => this._onKeyDown(e), false);
-    document.addEventListener('keyup', (e) => this._onKeyUp(e), false);
-  }
-  //Xử lý sự kiện nhấn nút
-  _onKeyDown(event) {
-    switch (event.keyCode) {
-      case 87: // w
-        this._move.forward = true;
-        break;
-      case 65: // a
-        this._move.left = true;
-        break;
-      case 83: // s
-        this._move.backward = true;
-        break;
-      case 68: // d
-        this._move.right = true;
-        break;
-    }
-  }
-  //Xử lý sự kiện thả nút
-  _onKeyUp(event) {
-    switch (event.keyCode) {
-      case 87: // w
-        this._move.forward = false;
-        break;
-      case 65: // a
-        this._move.left = false;
-        break;
-      case 83: // s
-        this._move.backward = false;
-        break;
-      case 68: // d
-        this._move.right = false;
-        break;
-    }
-  }
-  // Cập nhập trạng thái và vị trí của nhân vật
-  Update(timeInSeconds) {
-    const velocity = this._velocity;
-    const frameDecceleration = new THREE.Vector3(
-      velocity.x * this._decceleration.x,
-      velocity.y * this._decceleration.y,
-      velocity.z * this._decceleration.z
-    );
-    frameDecceleration.multiplyScalar(timeInSeconds);
-    frameDecceleration.z = Math.sign(frameDecceleration.z) * Math.min(
-      Math.abs(frameDecceleration.z), Math.abs(velocity.z));
-
-    velocity.add(frameDecceleration);
-
-    const controlObject = this._params.target;
-    const _Q = new THREE.Quaternion();
-    const _A = new THREE.Vector3();
-    const _R = controlObject.quaternion.clone();
-
-    if (this._move.forward) {
-      velocity.z += this._acceleration.z * timeInSeconds;
-    }
-    if (this._move.backward) {
-      velocity.z -= this._acceleration.z * timeInSeconds;
-    }
-    if (this._move.left) {
-      _A.set(0, 1, 0);
-      _Q.setFromAxisAngle(_A, Math.PI * timeInSeconds * this._acceleration.y);
-      _R.multiply(_Q);
-    }
-    if (this._move.right) {
-      _A.set(0, 1, 0);
-      _Q.setFromAxisAngle(_A, -Math.PI * timeInSeconds * this._acceleration.y);
-      _R.multiply(_Q);
-    }
-
-    controlObject.quaternion.copy(_R);
-
-    const oldPosition = new THREE.Vector3();
-    oldPosition.copy(controlObject.position);
-
-    const forward = new THREE.Vector3(0, 0, 1);
-    forward.applyQuaternion(controlObject.quaternion);
-    forward.normalize();
-
-    const sideways = new THREE.Vector3(1, 0, 0);
-    sideways.applyQuaternion(controlObject.quaternion);
-    sideways.normalize();
-
-    sideways.multiplyScalar(velocity.x * timeInSeconds);
-    forward.multiplyScalar(velocity.z * timeInSeconds);
-
-    controlObject.position.add(forward);
-    controlObject.position.add(sideways);
-
-    oldPosition.copy(controlObject.position);
-  }
-}
-
 class LoadModelDemo {
   constructor() {
     this._Initialize();
@@ -206,7 +88,7 @@ class LoadModelDemo {
     // Add đối tương ánh sáng vào
     this._scene.add(light);
     //Tạo đối tượng ánh sáng xung quan màu trắng, độ sáng = 2
-    light = new THREE.AmbientLight(0xFFFFFF, 2.0);
+    light = new THREE.AmbientLight(0xFFFFFF, 1.0);
     this._scene.add(light);
 
     //Tạo đối tương OrbitControls cho phép người dùng điều khiển camera
@@ -233,16 +115,30 @@ class LoadModelDemo {
     this._previousRAF = null;
 
     this._SetupMouseControls()
+    this._LoadAnimal()
     this._LoadClouds()
     this._LoadFoliage()
     this._LoadSky()
-    //this._LoadAnimatedModel();
+    this._LoadSound()
+
     this._LoadAnimatedModelAndPlay(
-      './resources/nobita/', 'nobita.fbx', 'Hip Hop Dancing.fbx', new THREE.Vector3(0, -1.5, 5));
+      './resources/nobita/', 'nobita.fbx', 'Hip Hop Dancing.fbx', new THREE.Vector3(0, -1.5, 5), 0.1);
     this._LoadAnimatedModelAndPlay(
-      './resources/dancer/', 'girl.fbx', 'dance.fbx', new THREE.Vector3(12, 0, -10));
+      './resources/doraemon/', 'doraemon.fbx', 'Hip Hop Dancing.fbx', new THREE.Vector3(30, 0, -15), 7);
     this._LoadAnimatedModelAndPlay(
-      './resources/dancer/', 'dancer.fbx', 'Silly Dancing.fbx', new THREE.Vector3(-12, 0, -10));
+      './resources/doraemon/', 'doraemon.fbx', 'Hip Hop Dancing.fbx', new THREE.Vector3(-30, 0, -15), 7);
+
+    // for (let i = 0; i < 10; ++i) {
+    //   const pos = new THREE.Vector3(
+    //     (Math.random() * 2.0 - 1.0) * 500,
+    //     0,
+    //     (Math.random() * 2.0 - 1.0) * 500
+    //   );
+    //   this._LoadAnimatedModelAndPlay(
+    //     './resources/animal/', 'Deer.fbx', '', pos, 0.06);
+    // }
+    
+
     this._RAF();
   }
 
@@ -287,6 +183,29 @@ class LoadModelDemo {
       const zoomSpeed = 0.1;
       this._camera.position.z -= deltaZoom * zoomSpeed;
     });
+  }
+
+  _LoadAnimal() {
+    for (let i = 0; i < 10; ++i) {
+      const pos = new THREE.Vector3(
+        (Math.random() * 2.0 - 1.0) * 500,
+        0,
+        (Math.random() * 2.0 - 1.0) * 500
+      );
+      this._LoadAnimatedModelAndPlay(
+        './resources/animal/', 'Deer.fbx', '', pos, 0.06);
+    }
+
+    for (let i = 0; i < 20; ++i) {
+      const pos = new THREE.Vector3(
+        (Math.random() * 2.0 - 1.0) * 500,
+        100,
+        (Math.random() * 2.0 - 1.0) * 500
+      );
+      this._LoadAnimatedModelAndPlay(
+        './resources/animal/', 'Bird.fbx', 'Bird_Animation.fbx', pos, 0.1);
+    }
+
   }
 
   _LoadSky() {
@@ -343,13 +262,37 @@ class LoadModelDemo {
   _LoadFoliage() {
     for (let i = 0; i < 100; ++i) {
       const names = [
-        "CommonTree_Dead",
-        "CommonTree",
         "BirchTree",
+        "BirchTree_Autumn",
         "BirchTree_Dead",
+        "BirchTree_Dead_Snow",
+        "BirchTree_Snow",
+
+        "Cactus",
+        "CactusFlowers",
+
+        "CommonTree",
+        "CommonTree_Autumn",
+        "CommonTree_Dead",
+        "CommonTree_Dead_Snow",
+        "CommonTree_Snow",
+
         "Willow",
+        "Willow_Autumn",
         "Willow_Dead",
+        "Willow_Dead_Snow",
+        "Willow_Snow",
+
         "PineTree",
+        "PineTree_Autumn",
+        "PineTree_Snow",
+
+        "Rock",
+        "Rock_Moss",
+        "Rock_Snow",
+
+        "Plant",
+        "PalmTree",
       ];
       const name = names[math.rand_int(0, names.length - 1)];
       const index = math.rand_int(1, 5);
@@ -379,40 +322,38 @@ class LoadModelDemo {
     }
   }
 
-  _LoadAnimatedModel() {
-    const loader = new FBXLoader();
-    loader.setPath('./resources/zombie/');
-    loader.load('mremireh_o_desbiens.fbx', (fbx) => {
-      //Thu nhỏ kích thước mô hình
-      fbx.scale.setScalar(0.1);
-      fbx.traverse(c => {
-        //Cho phép đổ bóng
-        c.castShadow = true;
-      });
+  _LoadSound() {
+    const listener = new THREE.AudioListener();
+    this._scene.add(listener);
 
-      const params = {
-        target: fbx,
-        camera: this._camera,
+    let sound; // Khai báo biến sound ở phạm vi chính
+
+    const playSound = () => {
+      sound = new THREE.Audio(listener); // Gán giá trị cho biến sound
+      const audioLoader = new THREE.AudioLoader();
+      audioLoader.load('./resources/sound/Doraemon.mp3', function (buffer) {
+        sound.setBuffer(buffer);
+        sound.setLoop(true);
+        sound.setVolume(1); // Giá trị volume từ 0 đến 1
+        sound.play();
+      });
+    };
+
+    // Sự kiện window.onload tự động phát nhạc sau khi trang web được tải lại
+    document.addEventListener('click', function () {
+      // Khởi tạo AudioContext sau sự kiện tương tác
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      if (!sound || sound.isPlaying === false) { // Kiểm tra nếu sound chưa được phát hoặc đang không phát
+        playSound();
       }
-      this._controls = new BasicCharacterControls(params);
-
-      const anim = new FBXLoader();
-      anim.setPath('./resources/zombie/');
-      anim.load('walk.fbx', (anim) => {
-        const m = new THREE.AnimationMixer(fbx);
-        this._mixers.push(m);
-        const idle = m.clipAction(anim.animations[0]);
-        idle.play();
-      });
-      this._scene.add(fbx);
     });
   }
 
-  _LoadAnimatedModelAndPlay(path, modelFile, animFile, offset) {
+  _LoadAnimatedModelAndPlay(path, modelFile, animFile, offset, scaleFactor) {
     const loader = new FBXLoader();
     loader.setPath(path);
     loader.load(modelFile, (fbx) => {
-      fbx.scale.setScalar(0.1);
+      fbx.scale.setScalar(scaleFactor);
       fbx.traverse(c => {
         c.castShadow = true;
       });
