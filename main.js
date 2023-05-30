@@ -124,9 +124,22 @@ class LoadModelDemo {
     this._LoadAnimatedModelAndPlay(
       './resources/nobita/', 'nobita.fbx', 'Hip Hop Dancing.fbx', new THREE.Vector3(0, -1.5, 5), 0.1);
     this._LoadAnimatedModelAndPlay(
-      './resources/doraemon/', 'doraemon.fbx', 'Hip Hop Dancing.fbx', new THREE.Vector3(30, 0, -15), 7);
+      './resources/doraemon/', 'doraemon.fbx', 'Flair.fbx', new THREE.Vector3(30, 2.5, -15), 7);
     this._LoadAnimatedModelAndPlay(
       './resources/doraemon/', 'doraemon.fbx', 'Hip Hop Dancing.fbx', new THREE.Vector3(-30, 0, -15), 7);
+
+
+    this._LoadAnimatedModelAndPlay(
+      './resources/small-concrete-pipe/source/', 'smallconcretepipe.fbx', '', new THREE.Vector3(50, 7.5, -70), 0.3);
+    this._LoadAnimatedModelAndPlay(
+      './resources/small-concrete-pipe/source/', 'smallconcretepipe.fbx', '', new THREE.Vector3(65, 7.5, -70), 0.3);
+    this._LoadAnimatedModelAndPlay(
+      './resources/small-concrete-pipe/source/', 'smallconcretepipe.fbx', '', new THREE.Vector3(57, 19, -70), 0.3);
+    this._LoadAnimatedModelAndPlay(
+      './resources/swing-set/source/', 'swing.fbx', '', new THREE.Vector3(-70, 0, -75), 0.04);
+    this._LoadAnimatedModelAndPlay(
+      './resources/slide/source/', 'SlideFinal.fbx', '', new THREE.Vector3(0, -5, -70), 7);
+
     this._RAF();
   }
 
@@ -235,7 +248,7 @@ class LoadModelDemo {
   }
 
   _LoadFoliage() {
-    for (let i = 0; i < 100; ++i) {
+    for (let i = 0; i < 50; ++i) {
       const names = [
         "BirchTree",
         "BirchTree_Autumn",
