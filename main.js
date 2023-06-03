@@ -88,7 +88,7 @@ class LoadModelDemo {
     // Add đối tương ánh sáng vào
     this._scene.add(light);
     //Tạo đối tượng ánh sáng xung quan màu trắng, độ sáng = 2
-    light = new THREE.AmbientLight(0xFFFFFF, 1.0);
+    light = new THREE.AmbientLight(0xFFFFFF, 0.5);
     this._scene.add(light);
 
     //Tạo đối tương OrbitControls cho phép người dùng điều khiển camera
@@ -98,10 +98,16 @@ class LoadModelDemo {
     controls.update();
 
     //Tạo mặt đất
+    const textureLoader = new THREE.TextureLoader();
+    const grassTexture = textureLoader.load('./resources/green-grass-texture.jpg');
+    grassTexture.wrapS = THREE.RepeatWrapping;
+    grassTexture.wrapT = THREE.RepeatWrapping;
+    grassTexture.repeat.set(50, 50);
+
     const plane = new THREE.Mesh(
       new THREE.PlaneGeometry(5000, 5000, 10, 10),
       new THREE.MeshStandardMaterial({
-        color: 0x1e601c,
+        map: grassTexture,
       })
     );
     plane.castShadow = false;
@@ -124,7 +130,7 @@ class LoadModelDemo {
     this._LoadAnimatedModelAndPlay(
       './resources/nobita/', 'nobita.fbx', 'Hip Hop Dancing.fbx', new THREE.Vector3(0, -1.5, 5), 0.1);
     this._LoadAnimatedModelAndPlay(
-      './resources/doraemon/', 'doraemon.fbx', 'Flair.fbx', new THREE.Vector3(30, 2.5, -15), 7);
+      './resources/doraemon/', 'doraemon.fbx', 'Hip Hop Dancing.fbx', new THREE.Vector3(30, 0, -15), 7);
     this._LoadAnimatedModelAndPlay(
       './resources/doraemon/', 'doraemon.fbx', 'Hip Hop Dancing.fbx', new THREE.Vector3(-30, 0, -15), 7);
 
@@ -185,17 +191,36 @@ class LoadModelDemo {
   }
 
   _LoadAnimal() {
+    const clock = new THREE.Clock();
     for (let i = 0; i < 10; ++i) {
+      const loader = new FBXLoader();
       const pos = new THREE.Vector3(
         (Math.random() * 2.0 - 1.0) * 500,
         0,
         (Math.random() * 2.0 - 1.0) * 500
       );
-      this._LoadAnimatedModelAndPlay(
-        './resources/animal/', 'Deer.fbx', '', pos, 0.06);
+      loader.setPath("./resources/deer-non-commercial/source/");
+      loader.load('Deer.fbx', (fbx) => {
+        fbx.scale.setScalar(0.06);
+        fbx.traverse(c => {
+          c.castShadow = true;
+          c.receiveShadow = true;
+        });
+        fbx.position.copy(pos);
+
+        // Add animation to the deer
+        const mixer = new THREE.AnimationMixer(fbx);
+        const animationAction = mixer.clipAction(fbx.animations[0]);
+        animationAction.play();
+    
+        // Store the mixer in a property or array for later update in the animation loop
+        this._mixers.push(mixer);
+        this._scene.add(fbx)
+      });
     }
   }
-
+  
+  
   _LoadSky() {
     const hemiLight = new THREE.HemisphereLight(0xffffff, 0xfffffff, 0.6);
     hemiLight.color.setHSL(0.6, 1, 0.6);
