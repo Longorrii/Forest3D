@@ -65,8 +65,8 @@ class LoadModelDemo {
     this._scene.background = new THREE.Color(0xffffff);
     this._scene.fog = new THREE.FogExp2(0x89b2eb, 0.002);
 
-    //Tạo 1 đối tượng ánh sáng có màu trắng và độ sáng = 1 
-    let light = new THREE.DirectionalLight(0xFFFFFF, 1.0);
+    //Tạo 1 đối tượng ánh sáng có màu trắng và độ sáng = 0.5 
+    let light = new THREE.DirectionalLight(0xFFFFFF, 0.5);
     //Đặt vị trí
     light.position.set(-10, 500, 10);
     //Ánh sáng hướng mục tiêu
